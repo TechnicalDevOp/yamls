@@ -1,11 +1,10 @@
 projects:
-  - id: test-b-001
-    test_name: Test B
-    git_url: https://github.com/TechnicalDevOp/TestFactory2.git
+  - name: Test B
+    url: https://github.com/TechnicalDevOp/TestFactory2.git
     tests_covered:
       - Integration Tests
-  - test_name: Test A
-    git_url: https://github.com/TechnicalDevOp/TestFactory2.git
+  - name: Test A
+    url: https://github.com/TechnicalDevOp/TestFactory2.git
     tests_covered:
       - Unit Tests
       - Smoke Tests
