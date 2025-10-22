@@ -1,6 +1,11 @@
 projects:
-  - id: test-b-001
-    test_name: Test B
+  - test_name: Test C
+    git_url: https://github.com/TechnicalDevOp/testFactory3.git
+    tests_covered:
+      - Pump Tests
+    dependencies:
+      - name: Pump Service
+  - test_name: Test B
     git_url: https://github.com/TechnicalDevOp/TestFactory2.git
     tests_covered:
       - Integration Tests
@@ -9,4 +14,8 @@ projects:
     tests_covered:
       - Unit Tests
       - Smoke Tests
-    
+services:
+  - name: Pump Service
+    git_url: https://github.com/TechnicalDevOp/testService.git
+config:
+  - id: test-b-001
