@@ -1,0 +1,79 @@
+name: test-list-tasks
+
+services:
+  nats-server:
+    image: nats:latest
+    container_name: nats-server-container
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: "-js"
+
+  webserver:
+    image: nginx:latest
+    container_name: webserver-container
+    ports:
+      - "8080:80"
+
+  date-task:
+    build:
+      context: .
+      dockerfile: Dockerfile.date
+    # image: test-list-tasks-date-task:latest
+    container_name: date-container
+    profiles:
+      - worker
+
+  nats-publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile.nats
+    # image: test-list-tasks-nats-publisher:latest
+    container_name: nats-publisher-container
+    profiles:
+      - worker
+
+  ping-task:
+    build:
+      context: .
+      dockerfile: Dockerfile.ping
+    # image: test-list-tasks-ping-task:latest
+    container_name: ping-container
+    profiles:
+      - worker
+
+  du-task:
+    build:
+      context: .
+      dockerfile: Dockerfile.du
+    # image: test-list-tasks-du-task:latest
+    container_name: du-container
+    profiles:
+      - worker
+
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.docker-cli
+    # image: docker:cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workdir
+    working_dir: /workdir
+    entrypoint: sh
+    command: >
+      -c "
+      cleanup() { echo 'Cleanup: Stoppe Services...'; docker compose stop webserver nats-server || echo 'Services bereits gestoppt'; echo 'Cleanup abgeschlossen'; };
+      trap cleanup EXIT INT TERM;
+      echo 'Orchestrator gestartet';
+      echo 'Warte auf NATS Server...'; sleep 2;
+      docker compose run --rm date-task && echo 'Date-Task erfolgreich' || echo 'Date-Task fehlgeschlagen';
+      docker compose run --rm nats-publisher && echo 'Nats-Publisher erfolgreich' || echo 'Nats-Publisher fehlgeschlagen';
+      docker compose run --rm ping-task && echo 'Ping-Task erfolgreich' || echo 'Ping-Task fehlgeschlagen';
+      docker compose run --rm du-task && echo 'Du-Task erfolgreich' || echo 'Du-Task fehlgeschlagen';
+      echo 'Alle Tasks abgeschlossen - Cleanup wird automatisch ausgeführt';
+      "
+    depends_on:
+      - webserver
+      - nats-server
+  
